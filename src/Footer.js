@@ -2,9 +2,9 @@ import "./Footer.css";
 
 function Footer() {
   return (
-    <div className="footer">
-      <p>© 2026 SénTransport ESP/UCAD</p>
-    </div>
+    <footer className="footer">
+      <p>&copy; 2026 SenTransport &mdash; ESP/UCAD</p>
+    </footer>
   );
 }
 
