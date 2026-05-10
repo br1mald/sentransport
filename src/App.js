@@ -5,11 +5,12 @@ import Recherche from "./Recherche";
 import LigneBus from "./LigneBus";
 import DetailLigne from "./DetailLigne";
 import Footer from "./Footer";
+import EraseButton from "./EraseButton";
 
 function App() {
   const [recherche, setRecherche] = useState("");
   const [ligneSelectionnee, setLigneSelectionnee] = useState(null);
-
+  const [compteur, setCompteur] = useState(0);
   const lignes = [
     {
       id: 1,
@@ -126,10 +127,27 @@ function App() {
     <div className="App">
       <Header />
       <main className="contenu">
-        <Recherche valeur={recherche} onChange={setRecherche} />
+        <p>
+          Vous avez effectué {compteur} recherche{compteur > 1 ? "s" : ""}
+        </p>
+        <div className="recherche-erase">
+          <Recherche
+            valeur={recherche}
+            compteur={compteur}
+            onChange={[setRecherche, setCompteur]}
+          />
+          <EraseButton onEffacer={setRecherche} />
+        </div>
         <p className="resultat-recherche">
-          {lignesFiltrees.length} ligne{lignesFiltrees.length > 1 ? "s" : ""}{" "}
-          trouvee{lignesFiltrees.length > 1 ? "s" : ""}
+          {lignesFiltrees.length === 0 ? (
+            "Aucune ligne trouvée"
+          ) : (
+            <>
+              {lignesFiltrees.length} ligne
+              {lignesFiltrees.length > 1 ? "s" : ""} trouvée
+              {lignesFiltrees.length > 1 ? "s" : ""}
+            </>
+          )}
         </p>
         {lignesFiltrees.map((ligne) => (
           <LigneBus

@@ -15,6 +15,16 @@
     flex: 1;
 }
 
+.recherche-erase {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    align-items: center;
+    align-content: center;
+    margin-bottom: 20px;
+    gap: 3px;
+}
+
 @media (max-width: 600px) {
     .contenu {
         padding: 12px;

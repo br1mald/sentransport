@@ -1,6 +1,6 @@
-import './Recherche.css';
+import "./Recherche.css";
 
-function Recherche({ valeur, onChange }) {
+function Recherche({ valeur, compteur, onChange }) {
   return (
     <div className="recherche">
       <input
@@ -8,7 +8,11 @@ function Recherche({ valeur, onChange }) {
         className="recherche-input"
         placeholder="Rechercher une ligne (depart, arrivee)..."
         value={valeur}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => {
+          const [setRecherche, setCompteur] = onChange;
+          setRecherche(e.target.value);
+          setCompteur(compteur + 1);
+        }}
       />
     </div>
   );
