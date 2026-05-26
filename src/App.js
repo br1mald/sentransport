@@ -6,6 +6,7 @@ import LigneBus from "./LigneBus";
 import DetailLigne from "./DetailLigne";
 import Footer from "./Footer";
 import EraseButton from "./EraseButton";
+import RechargerButton from "./RechargerButton";
 
 function App() {
   // 1. Trois etats
@@ -15,9 +16,9 @@ function App() {
   const [erreur, setErreur] = useState(null);
   const [recherche, setRecherche] = useState("");
   const [ligneSelectionnee, setLigneSelectionnee] = useState(null);
+  const [chargementDetail, setChargementDetail] = useState(false);
 
-  // 2. Charger les donnees au demarrage
-  useEffect(() => {
+  const recharger = () => {
     fetch("http://localhost:5001/lignes")
       .then((response) => {
         if (!response.ok) {
@@ -33,6 +34,11 @@ function App() {
         setErreur(error.message);
         setChargement(false);
       });
+  };
+
+  // 2. Charger les donnees au demarrage
+  useEffect(() => {
+    recharger();
   }, []);
 
   const lignesFiltrees = lignes.filter(
@@ -42,11 +48,24 @@ function App() {
       l.numero.includes(recherche),
   );
 
-  function handleClickLigne(ligne) {
+  async function handleClickLigne(ligne) {
     if (ligneSelectionnee && ligneSelectionnee.id === ligne.id) {
       setLigneSelectionnee(null);
     } else {
-      setLigneSelectionnee(ligne);
+      setChargementDetail(true);
+      try {
+        const response = await fetch(
+          `http://localhost:5001/lignes/${ligne.id}`,
+        );
+        if (!response.ok) {
+          throw new Error("Erreur serveur: " + response.status);
+        }
+        const details = await response.json();
+        setLigneSelectionnee(details);
+      } catch (error) {
+        console.error("Erreur chargement détails :", error);
+      }
+      setChargementDetail(false);
     }
   }
   // Ecran de chargement
@@ -91,6 +110,7 @@ function App() {
             onChange={[setRecherche, setCompteur]}
           />
           <EraseButton onEffacer={setRecherche} />
+          <RechargerButton onRecharger={recharger} />
         </div>
         <p className="resultat-recherche">
           {lignesFiltrees.length === 0 ? (
@@ -116,7 +136,12 @@ function App() {
             onClick={() => handleClickLigne(ligne)}
           />
         ))}
-        {ligneSelectionnee && <DetailLigne ligne={ligneSelectionnee} />}
+        {chargementDetail && (
+          <p className="message-chargement">Chargement des détails...</p>
+        )}
+        {!chargementDetail && ligneSelectionnee && (
+          <DetailLigne ligne={ligneSelectionnee} />
+        )}
       </main>
       <Footer />
     </div>
