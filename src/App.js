@@ -7,6 +7,7 @@ import DetailLigne from "./DetailLigne";
 import Footer from "./Footer";
 import EraseButton from "./EraseButton";
 import RechargerButton from "./RechargerButton";
+import Carte from "./Carte";
 
 function App() {
   // 1. Trois etats
@@ -142,6 +143,7 @@ function App() {
         {!chargementDetail && ligneSelectionnee && (
           <DetailLigne ligne={ligneSelectionnee} />
         )}
+        <Carte />
       </main>
       <Footer />
     </div>

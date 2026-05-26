@@ -92,21 +92,5 @@
       "HLM",
       "Sandaga"
     ]
-  },
-  {
-    "id": 7,
-    "numero": "20",
-    "depart": "Ouakam",
-    "arrivee": "Grand Dakar",
-    "arrets": 12,
-    "listeArrets": ["Ouakam", "Fann", "Mermoz", "Derklé", "Grand Dakar"]
-  },
-  {
-    "id": 8,
-    "numero": "14",
-    "depart": "Yoff",
-    "arrivee": "Plateau",
-    "arrets": 14,
-    "listeArrets": ["Yoff", "Ngor", "Almadies", "Mermoz", "Point E", "Plateau"]
   }
 ]

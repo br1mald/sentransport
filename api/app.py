@@ -9,6 +9,9 @@ CORS(app)
 with open("lignes_ddd.json", "r") as f:
     lignes = json.load(f)
 
+with open("arrets.json", "r") as f:
+    arrets = json.load(f)
+
 
 @app.route("/")
 def accueil():
@@ -33,12 +36,12 @@ def get_ligne(ligne_id):
     return jsonify(ligne)
 
 
-@app.route("/arrets", methods=["GET"])
-def get_arrets():
-    arrets = set()
-    for ligne in lignes:
-        arrets.update(arret for arret in ligne["listeArrets"])
-    return jsonify(list(arrets))
+# @app.route("/arrets", methods=["GET"])
+# def get_arrets():
+#     arrets = set()
+#     for ligne in lignes:
+#         arrets.update(arret for arret in ligne["listeArrets"])
+#     return jsonify(list(arrets))
 
 
 @app.route("/stats", methods=["GET"])
@@ -75,6 +78,11 @@ def recherche():
         return jsonify(lignes_list)
 
     return jsonify({"message": "ligne introuvable"})
+
+
+@app.route("/arrets")
+def get_arrets():
+    return jsonify(arrets)
 
 
 if __name__ == "__main__":
