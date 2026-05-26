@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./Carte.css";
@@ -13,6 +13,17 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
   shadowUrl:
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+});
+
+const iconeRouge = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
 });
 
 // Calculer la distance entre 2 points GPS (km)
@@ -30,10 +41,34 @@ function calculerDistance(lat1, lon1, lat2, lon2) {
   return R * c;
 }
 
+function BoutonCentrer({ position }) {
+  const map = useMap();
+  if (!position) return null;
+  return (
+    <button
+      onClick={() => map.setView(position, 15)}
+      style={{
+        position: "absolute",
+        top: 10,
+        right: 10,
+        zIndex: 1000,
+        padding: "8px 12px",
+        background: "#2c3e50",
+        color: "white",
+        border: "none",
+        borderRadius: "6px",
+        cursor: "pointer",
+      }}
+    >
+      Centrer sur ma position
+    </button>
+  );
+}
+
 function Carte() {
   const [arrets, setArrets] = useState([]);
   const [positionUtilisateur, setPositionUtilisateur] = useState(null);
-  const [arretProche, setArretProche] = useState(null);
+  const [arretsProches, setArretsProches] = useState([]);
   const DAKAR = [14.6928, -17.4467];
 
   // Charger les arrets depuis Flask
@@ -56,35 +91,37 @@ function Carte() {
     }
   }, []);
 
-  // Trouver l'arret le plus proche
+  // Trouver les arrets les plus proches
   useEffect(() => {
     if (positionUtilisateur && arrets.length > 0) {
-      let proche = null;
-      let dMin = Infinity;
-      arrets.forEach((a) => {
-        const d = calculerDistance(
+      const avecDistance = arrets.map((a) => ({
+        ...a,
+        distance: calculerDistance(
           positionUtilisateur[0],
           positionUtilisateur[1],
           a.lat,
           a.lon,
-        );
-        if (d < dMin) {
-          dMin = d;
-          proche = { ...a, distance: d };
-        }
-      });
-      setArretProche(proche);
+        ),
+      }));
+      avecDistance.sort((a, b) => a.distance - b.distance);
+      setArretsProches(avecDistance.slice(0, 3));
     }
   }, [positionUtilisateur, arrets]);
 
   return (
     <div className="carte-container">
       <h2 className="carte-titre">Carte des arrets</h2>
-      {arretProche && (
-        <p className="arret-proche">
-          Arret le plus proche :<strong> {arretProche.nom}</strong> (
-          {arretProche.distance.toFixed(1)} km)
-        </p>
+      {arretsProches.length > 0 && (
+        <div className="arret-proche">
+          <strong>Arrêts les plus proches :</strong>
+          <ol style={{ margin: "4px 0 0 16px", padding: 0 }}>
+            {arretsProches.map((a) => (
+              <li key={a.id}>
+                {a.nom} — {a.distance.toFixed(1)} km
+              </li>
+            ))}
+          </ol>
+        </div>
       )}
       <MapContainer center={DAKAR} zoom={13} className="carte">
         <TileLayer
@@ -92,7 +129,15 @@ function Carte() {
           attribution="&copy; OpenStreetMap"
         />
         {arrets.map((a) => (
-          <Marker key={a.id} position={[a.lat, a.lon]}>
+          <Marker
+            key={a.id}
+            position={[a.lat, a.lon]}
+            icon={
+              arretsProches.length > 0 && arretsProches[0].id === a.id
+                ? iconeRouge
+                : new L.Icon.Default()
+            }
+          >
             <Popup>
               <strong>{a.nom}</strong>
               <br />
@@ -100,11 +145,13 @@ function Carte() {
             </Popup>
           </Marker>
         ))}
+
         {positionUtilisateur && (
           <Marker position={positionUtilisateur}>
             <Popup>Vous etes ici</Popup>
           </Marker>
         )}
+        <BoutonCentrer position={positionUtilisateur} />
       </MapContainer>
     </div>
   );
